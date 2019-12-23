@@ -1,0 +1,42 @@
+service: ecr-vuln-alert-lambda
+
+provider:
+  name: aws
+  runtime: go1.x
+  timeout: 10
+  region: ${env:AWS_REGION}
+  memorySize: 128
+  stage: ${opt:stage, 'dev'}
+  environment:
+    ENV: ${self:provider.stage}
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - ecr:GetAuthorizationToken
+        - ecr:DescribeRepositories
+        - ecr:ListImages
+        - ecr:DescribeImages
+        - ecr:DescribeImageScanFindings
+        - logs:PutLogEvents
+        - logs:CreateLogGroup
+        - logs:CreateLogStream
+      Resource: "*"
+
+package:
+ exclude:
+   - ./**
+ include:
+   - ./bin/**
+
+functions:
+  ecr-vuln-alert:
+    handler: bin/handler
+    events:
+      - schedule:
+          rate: rate(10 minutes)
+          enabled: false
+          input:
+            key1: value1
+            key2: value2
+            stageParams:
+              stage: dev
