@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -125,48 +124,26 @@ func errorResponse(err error) events.APIGatewayProxyResponse {
 	return events.APIGatewayProxyResponse{Body: err.Error(), StatusCode: 500}
 }
 
-func populateEmojiValue(key string, fallback string) string {
-	value := os.Getenv(fmt.Sprintf("EMOJI_%s", key))
-	if len(value) == 0 {
-		return fallback
-	}
-	return value
-}
-
 func Handler(request events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
-	region := os.Getenv("AWS_REGION")
-	sess, err := session.NewSession(&aws.Config{Region: &region})
+	config := internal.InitConfig()
+	sess, err := session.NewSession(&aws.Config{Region: &config.Region})
 	if err != nil {
 		return errorResponse(err)
 	}
-
 	svc := ecr.New(sess)
 
-	minSev := os.Getenv("MINIMUM_SEVERITY")
-	if len(minSev) == 0 {
-		minSev = "HIGH"
-	}
-
-	emojiMatrix := map[string]string{}
-	defaultEmojis := []string{":no_entry:", ":warning:", ":pill:", ":rain_cloud:", ":information_source:", ":question:"}
-
-	for i, key := range internal.SeverityList {
-		emojiMatrix[key] = populateEmojiValue(key, defaultEmojis[i])
-	}
-
 	app := app{
-		env:             os.Getenv("ENV"),
-		region:          region,
-		minimumSeverity: minSev,
+		env:             config.Env,
+		region:          config.Region,
+		minimumSeverity: config.MinimumSeverity,
 		ecrService:      svc,
-		ecrRegistryID:   os.Getenv("ECR_ID"),
+		ecrRegistryID:   config.EcrID,
 		slackService: internal.NewSlackService(
-			os.Getenv("SLACK_TOKEN"),
-			os.Getenv("SLACK_CHANNEL"),
-			emojiMatrix,
+			config.SlackToken,
+			config.SlackChannel,
+			config.EmojiMap,
 		),
 	}
-
 	return app.Handle(request)
 }
 
