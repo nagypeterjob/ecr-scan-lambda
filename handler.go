@@ -125,6 +125,11 @@ func errorResponse(err error) events.APIGatewayProxyResponse {
 }
 
 func Handler(request events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
+	err := internal.PrintVersion()
+	if err != nil {
+		return errorResponse(err)
+	}
+
 	config := internal.InitConfig()
 	sess, err := session.NewSession(&aws.Config{Region: &config.Region})
 	if err != nil {
