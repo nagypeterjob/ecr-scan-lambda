@@ -1,4 +1,4 @@
-service: ecr-vuln-alert-lambda
+service: ecr-scan-lambda
 
 provider:
   name: aws
@@ -9,6 +9,17 @@ provider:
   stage: ${opt:stage, 'dev'}
   environment:
     ENV: ${self:provider.stage}
+    AWS_REGION: us-east-1
+		MINIMUM_SEVERITY: MEDIUM
+		SLACK_TOKEN: ""
+    SLACK_CHANNEL: ""
+    #ECR_ID: 
+    #EMOJI_CRITICAL:
+    #EMOJI_HIGH:
+    #EMOJI_MEDIUM:
+    #EMOJI_LOW:
+    #EMOJI_INFORMATIONAL:
+    #EMOJI_UNDEFINED:
   iamRoleStatements:
     - Effect: "Allow"
       Action:
@@ -21,7 +32,6 @@ provider:
         - logs:CreateLogGroup
         - logs:CreateLogStream
       Resource: "*"
-
 package:
  exclude:
    - ./**
@@ -29,14 +39,9 @@ package:
    - ./bin/**
 
 functions:
-  ecr-vuln-alert:
+  ecr-scan-lambda:
     handler: bin/handler
     events:
       - schedule:
-          rate: rate(10 minutes)
-          enabled: false
-          input:
-            key1: value1
-            key2: value2
-            stageParams:
-              stage: dev
+          rate: cron(0 8 * * *)
+          enabled: true

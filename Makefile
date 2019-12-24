@@ -3,7 +3,7 @@ TAG_VERSION=$$(git tag --sort=committerdate | tail -1)
 
 .PHONY: test
 test:
-	go test -count=1 -v $(shell go list ./... | grep -v /vendor/ | grep -v /metrics/cmd)
+	go test -count=1 -race -cover -v $(shell go list ./... | grep -v /vendor/ | grep -v /metrics/cmd)
 
 .PHONY: lint
 lint:
