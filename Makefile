@@ -5,6 +5,12 @@ TAG_VERSION=$$(git tag --sort=committerdate | tail -1)
 test:
 	go test -count=1 -race -cover -v $(shell go list ./... | grep -v /vendor/)
 
+
+.PHONY: go-lint-install
+go-lint-install:
+	go get -u golang.org/x/lint/golint
+	cp $(go list -f {{.Target}} golang.org/x/lint/golint) /usr/local/bin
+
 .PHONY: lint
 lint:
 	golint -set_exit_status `go list ./...`
