@@ -1,6 +1,8 @@
 # ecr-scan-lambda
 Lambdas which does ECR scan and sends results to slack
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/nagypeterjob/ecr-scan-lambda)](https://goreportcard.com/report/github.com/nagypeterjob/ecr-scan-lambda)
+
 ## Getting started
 
 The present repository does a little bit of SlackOps by reporting basic daily ECR vulnerablity scan reports to an arbitrary Slack channel. 
@@ -10,7 +12,7 @@ The serverless deployment consists of tho AWS Lambda functions:
 
 Both functions are timed & run by Cloudwatch events. Can be configured in **serverless.yml**
 
-### Prerequisits
+### Prerequisites
 1. Get a Slack application [token](https://api.slack.com/start/building)
 2. Read through the environment variables for bot functions
 3. Use **serverless.yml** to deploy functions to your AWS environment (or integrate it to your CI/CD pipeline)
