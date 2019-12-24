@@ -9,7 +9,7 @@ test:
 .PHONY: go-lint-install
 go-lint-install:
 	go get -u golang.org/x/lint/golint
-	cp $(go list -f {{.Target}} golang.org/x/lint/golint) /usr/local/bin
+	cp $$(go list -f {{.Target}} golang.org/x/lint/golint) /usr/local/bin
 
 .PHONY: lint
 lint:
