@@ -6,10 +6,10 @@ import (
 )
 
 var (
-	CommitHash string
-	Version    string
-	Date       string
-	Author     string
+	commitHash string
+	versionTag string
+	date       string
+	author     string
 )
 
 type version struct {
@@ -26,12 +26,13 @@ Date:   {{ .Date}}
 Version: {{ .Version}}
 `
 
+// PrintVersion outputs build related information to stdout
 func PrintVersion() error {
 	v := version{
-		CommitHash: CommitHash,
-		Version:    Version,
-		Date:       Date,
-		Author:     Author,
+		CommitHash: commitHash,
+		Version:    versionTag,
+		Date:       date,
+		Author:     author,
 	}
 
 	t, err := template.New("version").Parse(versionTemplate)

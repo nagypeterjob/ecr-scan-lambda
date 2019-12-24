@@ -17,7 +17,7 @@ var slackService = NewSlackService("", "", map[string]string{
 	"UNDEFINED":     ":question:",
 })
 
-func blockToJson(block interface{}) (string, error) {
+func blockToJSON(block interface{}) (string, error) {
 	b, err := json.MarshalIndent(block, "", "    ")
 	if err != nil {
 		return "", err
@@ -52,7 +52,7 @@ func TestGenerateTextBlock(t *testing.T) {
 		},
 	}
 	for i, c := range cases {
-		parsed, err := blockToJson(c.block)
+		parsed, err := blockToJSON(c.block)
 		if err != nil {
 			t.Fatalf("TestGenerateTextBlock json parse has failed")
 		}
@@ -185,7 +185,7 @@ func TestBlockMessage(t *testing.T) {
 		blocks := slackService.BuildMessageBlock(c.repository)
 		msg := slackService.BlockMessage(blocks...)
 
-		parsed, err := blockToJson(msg)
+		parsed, err := blockToJSON(msg)
 		if err != nil {
 			t.Fatalf("TestBlockMessage json parse has failed")
 		}

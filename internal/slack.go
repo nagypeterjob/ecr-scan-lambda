@@ -6,12 +6,14 @@ import (
 	"github.com/nlopes/slack"
 )
 
+// SlackService data structure for storing slack client related data
 type SlackService struct {
 	Client   *slack.Client
 	Channel  string
 	EmojiMap map[string]string
 }
 
+// NewSlackService populates a new SlackService instance
 func NewSlackService(token string, channel string, emojiMap map[string]string) *SlackService {
 	return &SlackService{
 		Client:   slack.New(token),
@@ -20,6 +22,7 @@ func NewSlackService(token string, channel string, emojiMap map[string]string) *
 	}
 }
 
+// BuildMessageBlock constructs severity related message body
 func (svc *SlackService) BuildMessageBlock(r Repository) []slack.Block {
 	headerText := fmt.Sprintf("Vulnerabilities found in *%s*:", r.Name)
 	headerSection := svc.GenerateTextBlock(headerText)
@@ -45,19 +48,23 @@ func (svc *SlackService) BuildMessageBlock(r Repository) []slack.Block {
 	return result
 }
 
+// GenerateTextBlock returns a slack SectionBlock for text input
 func (svc *SlackService) GenerateTextBlock(text string) slack.Block {
 	textBlock := slack.NewTextBlockObject("mrkdwn", text, false, false)
 	return slack.NewSectionBlock(textBlock, nil, nil)
 }
 
+// BlockMessage returns a slack BlockMessage for multiple Block inputs
 func (svc *SlackService) BlockMessage(blocks ...slack.Block) slack.Message {
 	return slack.NewBlockMessage(blocks...)
 }
 
+// PostMessage sends provided slack MessageBlocks to the given slack channel
 func (svc *SlackService) PostMessage(blocks ...slack.Block) (string, string, error) {
 	return svc.Client.PostMessage(svc.Channel, slack.MsgOptionBlocks(blocks...))
 }
 
+// PostStandaloneMessage generates slack SectionBlock for provided text and sends it to the given slack channel
 func (svc *SlackService) PostStandaloneMessage(message string) error {
 	blockParts := []slack.Block{svc.GenerateTextBlock(message)}
 	_, _, err := svc.PostMessage(blockParts...)

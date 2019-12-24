@@ -134,6 +134,7 @@ func errorResponse(err error) events.APIGatewayProxyResponse {
 	return events.APIGatewayProxyResponse{Body: err.Error(), StatusCode: 500}
 }
 
+// Handler is glues the lambda logic together
 func Handler(request events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
 	err := internal.PrintVersion()
 	if err != nil {

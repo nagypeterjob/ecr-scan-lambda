@@ -5,6 +5,7 @@ import (
 	"os"
 )
 
+// Config stores lambda configuration
 type Config struct {
 	Region          string
 	MinimumSeverity string
@@ -23,6 +24,7 @@ func populateEmojiValue(key string, fallback string) string {
 	return value
 }
 
+// InitConfig populates lambda configuration
 func InitConfig() Config {
 	minSev := os.Getenv("MINIMUM_SEVERITY")
 	if len(minSev) == 0 {

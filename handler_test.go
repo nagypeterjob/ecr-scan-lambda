@@ -8,7 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ecr"
 	"github.com/aws/aws-sdk-go/service/ecr/ecriface"
-	"github.com/nagypeterjob/ecr-vuln-alert-lambda/internal"
+	"github.com/nagypeterjob/ecr-scan-lambda/internal"
 )
 
 type mockApp struct{}
@@ -68,11 +68,11 @@ var appInstance = app{
 	minimumSeverity: "CRITICAL",
 }
 
-func (mock *mockApp) GetFindings(r *ecr.DescribeRepositoriesOutput) ([]ecr.DescribeImageScanFindingsOutput, []internal.ScanErrors) {
+func (a *mockApp) GetFindings(r *ecr.DescribeRepositoriesOutput) ([]ecr.DescribeImageScanFindingsOutput, []internal.ScanErrors) {
 	return appInstance.GetFindings(r)
 }
 
-func (mock *mockApp) filterBySeverity(findings []ecr.DescribeImageScanFindingsOutput) []internal.Repository {
+func (a *mockApp) filterBySeverity(findings []ecr.DescribeImageScanFindingsOutput) []internal.Repository {
 	return appInstance.filterBySeverity(findings)
 }
 
