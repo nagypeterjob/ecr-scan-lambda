@@ -17,8 +17,4 @@ jobs:
       env:
         GO111MODULE: "on"
       with:
-        args: go get -u "golang.org/x/lint/golint" \
-          && cp $(go list -f {{.Target}} "golang.org/x/lint/golint") /usr/local/bin \ 
-          && make lint \
-          && make test \
-          && make build-linux
+        args: make go-lint-install && make lint && make test && make build-linux
