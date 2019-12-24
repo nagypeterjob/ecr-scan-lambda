@@ -78,7 +78,7 @@ func (a *mockApp) filterBySeverity(findings []ecr.DescribeImageScanFindingsOutpu
 
 func TestGetFindings(t *testing.T) {
 	expectedFindings := 2
-	expectedErrors := 3
+	expectedErrors := 1
 
 	list, _ := mockAppInstance.listRepositories(1000)
 	findings, scanErrors := mockAppInstance.GetFindings(list)
