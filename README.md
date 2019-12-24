@@ -2,6 +2,8 @@
 Lambdas which does ECR scan and sends results to slack
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/nagypeterjob/ecr-scan-lambda)](https://goreportcard.com/report/github.com/nagypeterjob/ecr-scan-lambda)
+![](https://github.com/nagypeterjob/ecr-scan-lambda/workflows/Go%20tests/badge.svg?branch=master)
+
 
 ## Getting started
 
