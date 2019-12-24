@@ -8,18 +8,18 @@ test:
 .PHONY: build
 build:
 	GOOS=darwin go build -o="bin/handler" -ldflags="\
-	-X 'github.com/nagypeterjob/ecr-vuln-alert-lambda/internal/version.CommitHash=$(COMMIT_HASH)' \
-	-X 'github.com/nagypeterjob/ecr-vuln-alert-lambda/internal/version.Version=$(TAG_VERSION)' \
-	-X 'github.com/nagypeterjob/ecr-vuln-alert-lambda/internal/version.Date=$$(date)' \
-	-X 'github.com/nagypeterjob/ecr-vuln-alert-lambda/internal/version.Author=Peter Nagy<peter.nagy@recart.com>'" handler.go
+	-X 'github.com/nagypeterjob/ecr-scan-lambda/internal/version.CommitHash=$(COMMIT_HASH)' \
+	-X 'github.com/nagypeterjob/ecr-scan-lambda/internal/version.Version=$(TAG_VERSION)' \
+	-X 'github.com/nagypeterjob/ecr-scan-lambda/internal/version.Date=$$(date)' \
+	-X 'github.com/nagypeterjob/ecr-scan-lambda/internal/version.Author=Peter Nagy<peter.nagy@recart.com>'" handler.go
 
 .PHONY: build-linux 
 build-linux:
 	GOOS=linux go build -o="bin/handler" -ldflags="\
-	-X 'github.com/nagypeterjob/ecr-vuln-alert-lambda/internal/version.CommitHash=$(COMMIT_HASH)' \
-	-X 'github.com/nagypeterjob/ecr-vuln-alert-lambda/internal/version.Version=$(TAG_VERSION)' \
-	-X 'github.com/nagypeterjob/ecr-vuln-alert-lambda/internal/version.Date=$$(date)' \
-	-X 'github.com/nagypeterjob/ecr-vuln-alert-lambda/internal/version.Author=Peter Nagy<peter.nagy@recart.com>'" handler.go
+	-X 'github.com/nagypeterjob/ecr-scan-lambda/internal/version.CommitHash=$(COMMIT_HASH)' \
+	-X 'github.com/nagypeterjob/ecr-scan-lambda/internal/version.Version=$(TAG_VERSION)' \
+	-X 'github.com/nagypeterjob/ecr-scan-lambda/internal/version.Date=$$(date)' \
+	-X 'github.com/nagypeterjob/ecr-scan-lambda/internal/version.Author=Peter Nagy<peter.nagy@recart.com>'" handler.go
 	
 vendor:
 	go mod vendor

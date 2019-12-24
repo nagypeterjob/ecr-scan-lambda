@@ -1,4 +1,4 @@
-module github.com/nagypeterjob/ecr-vuln-alert-lambda
+module github.com/nagypeterjob/ecr-scan-lambda
 
 go 1.12
 

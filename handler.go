@@ -10,7 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ecr"
 	"github.com/aws/aws-sdk-go/service/ecr/ecriface"
-	"github.com/nagypeterjob/ecr-vuln-alert-lambda/internal"
+	"github.com/nagypeterjob/ecr-scan-lambda/internal"
 )
 
 type app struct {
