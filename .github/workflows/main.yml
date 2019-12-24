@@ -17,18 +17,8 @@ jobs:
       env:
         GO111MODULE: "on"
       with:
-        args: go get -u golang.org/x/lint/golint && cp $(go list -f {{.Target}} golang.org/x/lint/golint) /usr/local/bin && make lint
-      
-    - name: Run go test
-      uses: cedrickring/golang-action@1.4.1
-      env:
-        GO111MODULE: "on"
-      with:
-        args: make test
-
-    - name: Run go build
-      uses: cedrickring/golang-action@1.4.1
-      env:
-        GO111MODULE: "on"
-      with:
-        args: make build-linux
+        args: go get -u golang.org/x/lint/golint \
+          && cp $(go list -f {{.Target}} golang.org/x/lint/golint) /usr/local/bin \ 
+          && make lint \
+          && make test \
+          && make build-linux
