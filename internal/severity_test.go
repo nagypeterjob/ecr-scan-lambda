@@ -1,12 +1,9 @@
 package internal
 
-import "testing"
+import (
+	"testing"
 
-var (
-	a int64 = 1
-	b int64 = 2
-	c int64 = 3
-	d int64 = 4
+	"github.com/aws/aws-sdk-go/aws"
 )
 
 func TestCalculateScore(t *testing.T) {
@@ -17,8 +14,8 @@ func TestCalculateScore(t *testing.T) {
 		{
 			Severity: Severity{
 				Count: map[string]*int64{
-					"CRITICAL": &a,
-					"HIGH":     &b,
+					"CRITICAL": aws.Int64(1),
+					"HIGH":     aws.Int64(2),
 				},
 				Link: "",
 			},
@@ -27,9 +24,9 @@ func TestCalculateScore(t *testing.T) {
 		{
 			Severity: Severity{
 				Count: map[string]*int64{
-					"CRITICAL": &a,
-					"HIGH":     &b,
-					"MEDIUM":   &c,
+					"CRITICAL": aws.Int64(1),
+					"HIGH":     aws.Int64(2),
+					"MEDIUM":   aws.Int64(3),
 				},
 				Link: "",
 			},
@@ -38,9 +35,9 @@ func TestCalculateScore(t *testing.T) {
 		{
 			Severity: Severity{
 				Count: map[string]*int64{
-					"CRITICAL":  &a,
-					"LOW":       &b,
-					"UNDEFINED": &d,
+					"CRITICAL":  aws.Int64(1),
+					"LOW":       aws.Int64(2),
+					"UNDEFINED": aws.Int64(3),
 				},
 				Link: "",
 			},

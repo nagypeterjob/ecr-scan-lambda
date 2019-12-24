@@ -9,6 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ecr"
+	"github.com/aws/aws-sdk-go/service/ecr/ecriface"
 	"github.com/nagypeterjob/ecr-vuln-alert-lambda/internal"
 )
 
@@ -17,11 +18,11 @@ type app struct {
 	region          string
 	minimumSeverity string
 	ecrRegistryID   string
-	ecrService      *ecr.ECR
+	ecrService      ecriface.ECRAPI
 	slackService    *internal.SlackService
 }
 
-func (a *app) ListRepositories(maxRepos int) (*ecr.DescribeRepositoriesOutput, error) {
+func (a *app) listRepositories(maxRepos int) (*ecr.DescribeRepositoriesOutput, error) {
 	mr := int64(maxRepos)
 	input := ecr.DescribeRepositoriesInput{
 		MaxResults: &mr,
@@ -32,6 +33,10 @@ func (a *app) ListRepositories(maxRepos int) (*ecr.DescribeRepositoriesOutput, e
 	}
 
 	return a.ecrService.DescribeRepositories(&input)
+}
+
+func (a *app) describeImageScanFindings(input *ecr.DescribeImageScanFindingsInput) (*ecr.DescribeImageScanFindingsOutput, error) {
+	return a.ecrService.DescribeImageScanFindings(input)
 }
 
 func (a *app) GetFindings(r *ecr.DescribeRepositoriesOutput) ([]ecr.DescribeImageScanFindingsOutput, []internal.ScanErrors) {
@@ -50,25 +55,18 @@ func (a *app) GetFindings(r *ecr.DescribeRepositoriesOutput) ([]ecr.DescribeImag
 			describeInput.RegistryId = aws.String(a.ecrRegistryID)
 		}
 
-		finding, err := a.ecrService.DescribeImageScanFindings(&describeInput)
+		finding, err := a.describeImageScanFindings(&describeInput)
 		if err != nil {
 			failed = append(failed, internal.ScanErrors{RepositoryName: *repo.RepositoryName})
+		} else {
+			findings = append(findings, *finding)
 		}
-		findings = append(findings, *finding)
 	}
 	return findings, failed
 }
 
-func (a *app) Handle(request events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
-	list, err := a.ListRepositories(1000)
-	if err != nil {
-		return errorResponse(err)
-	}
-
-	findings, scanErrors := a.GetFindings(list)
-
+func (a *app) filterBySeverity(findings []ecr.DescribeImageScanFindingsOutput) []internal.Repository {
 	var filtered []internal.Repository
-
 	for _, finding := range findings {
 		if finding.ImageScanFindings != nil && len(finding.ImageScanFindings.FindingSeverityCounts) != 0 {
 			r := internal.Repository{
@@ -83,6 +81,18 @@ func (a *app) Handle(request events.APIGatewayProxyRequest) events.APIGatewayPro
 			}
 		}
 	}
+	return filtered
+}
+
+func (a *app) Handle(request events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
+	list, err := a.listRepositories(1000)
+	if err != nil {
+		return errorResponse(err)
+	}
+
+	findings, scanErrors := a.GetFindings(list)
+
+	filtered := a.filterBySeverity(findings)
 
 	headerMsg := fmt.Sprintf("*Scan results on %s*", time.Now().Format("2006 Jan 02"))
 	err = a.slackService.PostStandaloneMessage(headerMsg)

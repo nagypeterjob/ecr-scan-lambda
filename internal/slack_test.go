@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/nlopes/slack"
 )
 
@@ -61,15 +62,6 @@ func TestGenerateTextBlock(t *testing.T) {
 	}
 }
 
-var (
-	critical int64 = 1
-	high     int64 = 2
-	medium   int64 = 3
-	low      int64 = 4
-	info     int64 = 5
-	undef    int64 = 6
-)
-
 func TestBuildMessageBlock(t *testing.T) {
 	cases := []struct {
 		repository Repository
@@ -80,12 +72,12 @@ func TestBuildMessageBlock(t *testing.T) {
 				Name: "TestRepository",
 				Severity: Severity{
 					Count: map[string]*int64{
-						"CRITICAL":      &critical,
-						"HIGH":          &high,
-						"MEDIUM":        &medium,
-						"LOW":           &low,
-						"INFORMATIONAL": &info,
-						"UNDEFINED":     &undef,
+						"CRITICAL":      aws.Int64(1),
+						"HIGH":          aws.Int64(2),
+						"MEDIUM":        aws.Int64(3),
+						"LOW":           aws.Int64(4),
+						"INFORMATIONAL": aws.Int64(5),
+						"UNDEFINED":     aws.Int64(6),
 					},
 					Link: "https://console.aws.amazon.com/ecr/repositories/testrepository/image/sha256:262000a32cb2e7cbd397f7bc0feb2c495f2f5fc59d6a06ca3078eec3dcd4084b/scan-results?region=us-region-1",
 				},
@@ -112,12 +104,12 @@ func TestBlockMessage(t *testing.T) {
 				Name: "TestRepository",
 				Severity: Severity{
 					Count: map[string]*int64{
-						"CRITICAL":      &critical,
-						"HIGH":          &high,
-						"MEDIUM":        &medium,
-						"LOW":           &low,
-						"INFORMATIONAL": &info,
-						"UNDEFINED":     &undef,
+						"CRITICAL":      aws.Int64(1),
+						"HIGH":          aws.Int64(2),
+						"MEDIUM":        aws.Int64(3),
+						"LOW":           aws.Int64(4),
+						"INFORMATIONAL": aws.Int64(5),
+						"UNDEFINED":     aws.Int64(6),
 					},
 					Link: "https://console.aws.amazon.com/ecr/repositories/testrepository/image/sha256:262000a32cb2e7cbd397f7bc0feb2c495f2f5fc59d6a06ca3078eec3dcd4084b/scan-results?region=us-region-1",
 				},
