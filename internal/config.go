@@ -46,7 +46,7 @@ func InitConfig() Config {
 	}
 
 	return Config{
-		Region:          os.Getenv("AWS_REGION"),
+		Region:          os.Getenv("REGION"),
 		MinimumSeverity: minSev,
 		Env:             os.Getenv("ENV"),
 		EcrID:           os.Getenv("ECR_ID"),

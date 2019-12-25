@@ -53,7 +53,7 @@ func (a *app) Handle(request events.APIGatewayProxyRequest) events.APIGatewayPro
 
 		_, err := a.ecrService.PutImageScanningConfiguration(&scanConfigInput)
 		if err != nil {
-			fmt.Println("Could't set image scaning configuration for repository: ", repo.RepositoryName)
+			fmt.Println(fmt.Sprintf("Could't set image scaning configuration for repository: %s, error: %s", *repo.RepositoryName, err.Error()))
 		}
 		startImageScanInput := ecr.StartImageScanInput{
 			ImageId: &ecr.ImageIdentifier{
@@ -63,18 +63,18 @@ func (a *app) Handle(request events.APIGatewayProxyRequest) events.APIGatewayPro
 		}
 		_, err = a.ecrService.StartImageScan(&startImageScanInput)
 		if err != nil {
-			fmt.Println("Image scan today was already done for repository: ", repo.RepositoryName)
+			fmt.Println(fmt.Sprintf("Image scan today was already done for repository: %s, error: %s", *repo.RepositoryName, err.Error()))
 		}
 	}
 	return events.APIGatewayProxyResponse{}
 }
 
 // Handler glues the lambda logic together
-func Handler(request events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
-	region := os.Getenv("AWS_REGION")
+func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	region := os.Getenv("REGION")
 	sess, err := session.NewSession(&aws.Config{Region: &region})
 	if err != nil {
-		return errorResponse(err)
+		return errorResponse(err), nil
 	}
 	svc := ecr.New(sess)
 	app := app{
@@ -83,7 +83,7 @@ func Handler(request events.APIGatewayProxyRequest) events.APIGatewayProxyRespon
 		ecrRegistryID: os.Getenv("ECR_ID"),
 		ecrService:    svc,
 	}
-	return app.Handle(request)
+	return app.Handle(request), nil
 }
 
 func main() {

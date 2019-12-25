@@ -3,7 +3,7 @@ service: ecr-scan-lambda
 provider:
   name: aws
   runtime: go1.x
-  timeout: 10
+  timeout: 20
   region: ${env:AWS_REGION}
   memorySize: 128
   stage: ${opt:stage, 'dev'}
@@ -17,6 +17,8 @@ provider:
         - ecr:ListImages
         - ecr:DescribeImages
         - ecr:DescribeImageScanFindings
+        - ecr:StartImageScan
+        - ecr:PutImageScanningConfiguration
         - logs:PutLogEvents
         - logs:CreateLogGroup
         - logs:CreateLogStream
@@ -32,7 +34,7 @@ functions:
     handler: bin/handler
     environment:
       ENV: ${self:provider.stage}
-      AWS_REGION: us-east-1
+      REGION: us-east-1
       MINIMUM_SEVERITY: MEDIUM
       SLACK_TOKEN: ""
       SLACK_CHANNEL: ""
@@ -51,7 +53,7 @@ functions:
     handler: bin/scan
     environment:
       ENV: ${self:provider.stage}
-      AWS_REGION: us-east-1
+      REGION: us-east-1
       #ECR_ID: 
     events:
       - schedule: cron(0 7 * * ? *)
