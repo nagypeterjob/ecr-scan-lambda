@@ -76,6 +76,7 @@ NOTE: make build compiles both functions.
 - Same thing with `DescribeImageScanFindings` in report/report.go. The code could leverage goroutines and run concurrently.
 - Mocks and some tests could be definitely improved. More tests should be added.
 - The report funcion works well until 1000 repositories. The function currently doesn't implement paging. Paging for `DescribeRepositories` should be implemented.
+- The functions use the legacy Slack Token instead of the preferred Slack Webhooks. Need some research to see how Blocks can be used with Webhooks.
 
 ## Issues
 If stumble upon errors or just need a feature request, please open an issue. PRs are welcome.
