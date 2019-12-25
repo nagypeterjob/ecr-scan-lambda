@@ -83,7 +83,6 @@ NOTE: the Serverless framework will create a Cloudformation deployment.
 - **ECR_ID** - If you want to use other ECR than the default, **Optional**
 
 ## Known problems waiting for improvement
-- There are code duplications in report/report.go and scan/scan.go. Functions like `func (a *app) listRepositories(maxRepos int) (*ecr.DescribeRepositoriesOutput, error)` could be lifted to `internal` and reused in both handlers.
 - `PutImageScanningConfiguration` and `StartImageScan` in scan/scan.go can run independently for each repository. The code could leverage goroutines and run concurrently.
 - Same thing with `DescribeImageScanFindings` in report/report.go. The code could leverage goroutines and run concurrently.
 - Mocks and some tests could be definitely improved. More tests should be added.
