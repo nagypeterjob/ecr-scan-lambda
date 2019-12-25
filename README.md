@@ -50,6 +50,17 @@ The proper role and policies are created by the serverless framework.
 NOTE: make build compiles both functions.
 ```
 
+### How to deploy functions
+
+Deploy with minimum configuration:
+```bash
+REGION=us-east-1 serverless deploy --stage production
+```
+
+```
+NOTE: the Serverless framework will create a Cloudformation deployment.
+```
+
 ## Environment variables
 
 ### For ecr-scan-lambda
