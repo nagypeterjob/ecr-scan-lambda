@@ -28,6 +28,8 @@ In order to work properly, the functions need the following AWS policies:
     - ecr:ListImages
     - ecr:DescribeImages
     - ecr:DescribeImageScanFindings
+    - ecr:StartImageScan
+    - ecr:PutImageScanningConfiguration
     - logs:PutLogEvents
     - logs:CreateLogGroup
     - logs:CreateLogStream
