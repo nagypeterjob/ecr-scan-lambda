@@ -57,7 +57,7 @@ Deploy with minimum configuration:
 REGION=us-east-1 serverless deploy --stage production
 ```
 
-```
+```bash
 NOTE: the Serverless framework will create a Cloudformation deployment.
 ```
 
