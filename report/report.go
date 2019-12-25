@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/ecr"
 	"github.com/nagypeterjob/ecr-scan-lambda/internal"
 )
 
@@ -84,7 +85,7 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 		env:             config.Env,
 		region:          config.Region,
 		minimumSeverity: config.MinimumSeverity,
-		ecrService:      internal.NewECRService(config.EcrID, sess),
+		ecrService:      internal.NewECRService(config.EcrID, ecr.New(sess)),
 		slackService: internal.NewSlackService(
 			config.SlackToken,
 			config.SlackChannel,

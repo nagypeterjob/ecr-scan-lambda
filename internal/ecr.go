@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ecr"
 	"github.com/aws/aws-sdk-go/service/ecr/ecriface"
 )
@@ -16,9 +15,9 @@ type ECRService struct {
 }
 
 // NewECRService populates a new ECRService instance
-func NewECRService(registryID string, sess *session.Session) *ECRService {
+func NewECRService(registryID string, client ecriface.ECRAPI) *ECRService {
 	return &ECRService{
-		client:     ecr.New(sess),
+		client:     client,
 		registryID: registryID,
 	}
 }
@@ -51,7 +50,7 @@ func (svc *ECRService) getImageScanFinding(repo *ecr.Repository) (*ecr.DescribeI
 	return svc.client.DescribeImageScanFindings(&describeInput)
 }
 
-func (svc *ECRService) filterBySeverity(finding ecr.DescribeImageScanFindingsOutput, filtered []Repository, region string, minimumSeverity string) []Repository {
+func (svc *ECRService) filterBySeverity(finding *ecr.DescribeImageScanFindingsOutput, filtered []Repository, region string, minimumSeverity string) []Repository {
 	if finding.ImageScanFindings != nil && len(finding.ImageScanFindings.FindingSeverityCounts) != 0 {
 		r := Repository{
 			Name: *finding.RepositoryName,
@@ -79,7 +78,7 @@ func (svc *ECRService) GetFilteredFindings(r *ecr.DescribeRepositoriesOutput, re
 		if err != nil {
 			failed = append(failed, ScanErrors{RepositoryName: *repo.RepositoryName})
 		} else {
-			filtered = svc.filterBySeverity(*finding, filtered, region, minimumSeverity)
+			filtered = svc.filterBySeverity(finding, filtered, region, minimumSeverity)
 		}
 	}
 	return filtered, failed
