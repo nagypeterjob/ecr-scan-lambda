@@ -15,9 +15,10 @@ The serverless deployment consists of tho AWS Lambda functions:
 Both functions are timed & run by Cloudwatch events. Can be configured in **serverless.yml**
 
 ### Prerequisites
-1. Get a Slack application [token](https://api.slack.com/start/building)
-2. Read through the environment variables for bot functions
-3. Use **serverless.yml** to deploy functions to your AWS environment (or integrate it to your CI/CD pipeline)
+1. The report function returns scan restults for the `latest` version of each image. Make sure to have `latest` version tag for your images beside the semantically tagged ones. 
+2. Get a Slack application (legacy) [token](https://api.slack.com/start/building)
+3. Read through the environment variables for bot functions
+4. Use **serverless.yml** to deploy functions to your AWS environment (or integrate it to your CI/CD pipeline)
 
 In order to work properly, the functions need the following AWS policies:
 ```
