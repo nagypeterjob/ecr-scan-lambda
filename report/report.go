@@ -8,8 +8,6 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/ecr"
-	"github.com/aws/aws-sdk-go/service/ecr/ecriface"
 	"github.com/nagypeterjob/ecr-scan-lambda/internal"
 )
 
@@ -17,82 +15,17 @@ type app struct {
 	env             string
 	region          string
 	minimumSeverity string
-	ecrRegistryID   string
-	ecrService      ecriface.ECRAPI
+	ecrService      *internal.ECRService
 	slackService    *internal.SlackService
 }
 
-func (a *app) listRepositories(maxRepos int) (*ecr.DescribeRepositoriesOutput, error) {
-	mr := int64(maxRepos)
-	input := ecr.DescribeRepositoriesInput{
-		MaxResults: &mr,
-	}
-
-	if len(a.ecrRegistryID) != 0 {
-		input.RegistryId = aws.String(a.ecrRegistryID)
-	}
-
-	return a.ecrService.DescribeRepositories(&input)
-}
-
-func (a *app) describeImageScanFindings(input *ecr.DescribeImageScanFindingsInput) (*ecr.DescribeImageScanFindingsOutput, error) {
-	return a.ecrService.DescribeImageScanFindings(input)
-}
-
-func (a *app) GetFindings(r *ecr.DescribeRepositoriesOutput) ([]ecr.DescribeImageScanFindingsOutput, []internal.ScanErrors) {
-	var findings []ecr.DescribeImageScanFindingsOutput
-	var failed []internal.ScanErrors
-
-	for _, repo := range r.Repositories {
-		describeInput := ecr.DescribeImageScanFindingsInput{
-			ImageId: &ecr.ImageIdentifier{
-				ImageTag: aws.String("latest"),
-			},
-			RepositoryName: repo.RepositoryName,
-		}
-
-		if len(a.ecrRegistryID) != 0 {
-			describeInput.RegistryId = aws.String(a.ecrRegistryID)
-		}
-
-		finding, err := a.describeImageScanFindings(&describeInput)
-		if err != nil {
-			failed = append(failed, internal.ScanErrors{RepositoryName: *repo.RepositoryName})
-		} else {
-			findings = append(findings, *finding)
-		}
-	}
-	return findings, failed
-}
-
-func (a *app) filterBySeverity(findings []ecr.DescribeImageScanFindingsOutput) []internal.Repository {
-	var filtered []internal.Repository
-	for _, finding := range findings {
-		if finding.ImageScanFindings != nil && len(finding.ImageScanFindings.FindingSeverityCounts) != 0 {
-			r := internal.Repository{
-				Name: *finding.RepositoryName,
-				Severity: internal.Severity{
-					Count: finding.ImageScanFindings.FindingSeverityCounts,
-					Link:  fmt.Sprintf("https://console.aws.amazon.com/ecr/repositories/%s/image/%s/scan-results?region=%s", *finding.RepositoryName, *finding.ImageId.ImageDigest, a.region),
-				},
-			}
-			if r.Severity.CalculateScore() >= internal.SeverityTable[a.minimumSeverity] {
-				filtered = append(filtered, r)
-			}
-		}
-	}
-	return filtered
-}
-
 func (a *app) Handle(request events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
-	list, err := a.listRepositories(1000)
+	list, err := a.ecrService.ListRepositories(1000)
 	if err != nil {
 		return errorResponse(err)
 	}
 
-	findings, scanErrors := a.GetFindings(list)
-
-	filtered := a.filterBySeverity(findings)
+	filtered, scanErrors := a.ecrService.GetFilteredFindings(list, a.region, a.minimumSeverity)
 
 	headerMsg := fmt.Sprintf("*Scan results on %s*", time.Now().Format("2006 Jan 02"))
 	err = a.slackService.PostStandaloneMessage(headerMsg)
@@ -146,14 +79,12 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	if err != nil {
 		return errorResponse(err), nil
 	}
-	svc := ecr.New(sess)
 
 	app := app{
 		env:             config.Env,
 		region:          config.Region,
 		minimumSeverity: config.MinimumSeverity,
-		ecrService:      svc,
-		ecrRegistryID:   config.EcrID,
+		ecrService:      internal.NewECRService(config.EcrID, sess),
 		slackService: internal.NewSlackService(
 			config.SlackToken,
 			config.SlackChannel,
