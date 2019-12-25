@@ -111,7 +111,7 @@ func (a *app) Handle(request events.APIGatewayProxyRequest) events.APIGatewayPro
 	}
 
 	if len(scanErrors) != 0 {
-		errorMsg := fmt.Sprintf(":x: *Failed get scan results from the following repos:* :x:")
+		errorMsg := fmt.Sprintf(":x: *Failed to get scan results from the following repos:* :x:")
 		err = a.slackService.PostStandaloneMessage(errorMsg)
 		if err != nil {
 			return errorResponse(err)
@@ -135,16 +135,16 @@ func errorResponse(err error) events.APIGatewayProxyResponse {
 }
 
 // Handler glues the lambda logic together
-func Handler(request events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
+func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	err := internal.PrintVersion()
 	if err != nil {
-		return errorResponse(err)
+		return errorResponse(err), nil
 	}
 
 	config := internal.InitConfig()
 	sess, err := session.NewSession(&aws.Config{Region: &config.Region})
 	if err != nil {
-		return errorResponse(err)
+		return errorResponse(err), nil
 	}
 	svc := ecr.New(sess)
 
@@ -160,7 +160,7 @@ func Handler(request events.APIGatewayProxyRequest) events.APIGatewayProxyRespon
 			config.EmojiMap,
 		),
 	}
-	return app.Handle(request)
+	return app.Handle(request), nil
 }
 
 func main() {

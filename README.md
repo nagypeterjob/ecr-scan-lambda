@@ -53,7 +53,7 @@ NOTE: make build compiles both functions.
 
 ### For ecr-scan-lambda
 - **ENV** - Lambda function environment, **Required**
-- **AWS_REGION** - AWS region to deploy functions to, **Required**
+- **REGION** - AWS region of the setup, **Required**
 - **MINIMUM_SEVERITY** - The minimum severity level which should be reported, `Default: HIGH`, **Optional**
 - **SLACK_TOKEN** - Slack API Token, **Required**
 - **SLACK_CHANNEL** - Slack channel name to report to (with #prefix), **Required**, *Example*: #ecr-scan
@@ -67,7 +67,7 @@ NOTE: make build compiles both functions.
 
 ### For ecr-report-lambda
 - **ENV** - Lambda function environment, **Required**
-- **AWS_REGION** - AWS region to deploy functions to, **Required**
+- **REGION** - AWS region of the setup, **Required**
 - **ECR_ID** - If you want to use other ECR than the default, **Optional**
 
 ## Known problems waiting for improvement

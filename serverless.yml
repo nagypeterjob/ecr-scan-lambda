@@ -31,13 +31,13 @@ package:
 
 functions:
   ecr-report-lambda:
-    handler: bin/handler
+    handler: bin/report
     environment:
       ENV: ${self:provider.stage}
       REGION: us-east-1
-      MINIMUM_SEVERITY: MEDIUM
+      MINIMUM_SEVERITY: CRITICAL
       SLACK_TOKEN: ""
-      SLACK_CHANNEL: ""
+      SLACK_CHANNEL: "general"
       #ECR_ID: 
       #EMOJI_CRITICAL:
       #EMOJI_HIGH:
