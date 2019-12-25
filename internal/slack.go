@@ -62,7 +62,7 @@ func (svc *SlackService) BlockMessage(blocks ...slack.Block) slack.Message {
 
 // PostMessage sends provided slack MessageBlocks to the given slack channel
 func (svc *SlackService) PostMessage(blocks ...slack.Block) (string, string, error) {
-	//Wait one second so posting doesn't exceed Slack's rate limit
+	// Wait one second so posting doesn't exceed Slack's rate limit
 	time.Sleep(1 * time.Second)
 	return svc.Client.PostMessage(svc.Channel, slack.MsgOptionBlocks(blocks...))
 }
