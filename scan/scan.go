@@ -9,26 +9,14 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ecr"
-	"github.com/aws/aws-sdk-go/service/ecr/ecriface"
+	"github.com/nagypeterjob/ecr-scan-lambda/internal"
 )
 
 type app struct {
 	env           string
 	region        string
 	ecrRegistryID string
-	ecrService    ecriface.ECRAPI
-}
-
-func (a *app) listRepositories(maxRepos int) (*ecr.DescribeRepositoriesOutput, error) {
-	mr := int64(maxRepos)
-	input := ecr.DescribeRepositoriesInput{
-		MaxResults: &mr,
-	}
-
-	if len(a.ecrRegistryID) != 0 {
-		input.RegistryId = aws.String(a.ecrRegistryID)
-	}
-	return a.ecrService.DescribeRepositories(&input)
+	ecrService    *internal.ECRService
 }
 
 func errorResponse(err error) events.APIGatewayProxyResponse {
@@ -36,32 +24,17 @@ func errorResponse(err error) events.APIGatewayProxyResponse {
 }
 
 func (a *app) Handle(request events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
-	list, err := a.listRepositories(1000)
+	list, err := a.ecrService.ListRepositories(1000)
 	if err != nil {
 		return errorResponse(err)
 	}
 	for _, repo := range list.Repositories {
-		scanConfigInput := ecr.PutImageScanningConfigurationInput{
-			RepositoryName: repo.RepositoryName,
-			ImageScanningConfiguration: &ecr.ImageScanningConfiguration{
-				ScanOnPush: aws.Bool(true),
-			},
-		}
-		if len(a.ecrRegistryID) != 0 {
-			scanConfigInput.RegistryId = aws.String(a.ecrRegistryID)
-		}
-
-		_, err := a.ecrService.PutImageScanningConfiguration(&scanConfigInput)
+		_, err = a.ecrService.PutImageScanningConfiguration(repo)
 		if err != nil {
 			fmt.Println(fmt.Sprintf("Could't set image scaning configuration for repository: %s, error: %s", *repo.RepositoryName, err.Error()))
 		}
-		startImageScanInput := ecr.StartImageScanInput{
-			ImageId: &ecr.ImageIdentifier{
-				ImageTag: aws.String("latest"),
-			},
-			RepositoryName: repo.RepositoryName,
-		}
-		_, err = a.ecrService.StartImageScan(&startImageScanInput)
+
+		_, err := a.ecrService.StartImageScan(repo.RepositoryName)
 		if err != nil {
 			fmt.Println(fmt.Sprintf("Image scan today was already done for repository: %s, error: %s", *repo.RepositoryName, err.Error()))
 		}
@@ -76,12 +49,11 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	if err != nil {
 		return errorResponse(err), nil
 	}
-	svc := ecr.New(sess)
 	app := app{
 		env:           os.Getenv("ENV"),
 		region:        region,
 		ecrRegistryID: os.Getenv("ECR_ID"),
-		ecrService:    svc,
+		ecrService:    internal.NewECRService(region, ecr.New(sess)),
 	}
 	return app.Handle(request), nil
 }
