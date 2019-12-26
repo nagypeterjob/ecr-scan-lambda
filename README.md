@@ -87,6 +87,12 @@ NOTE: the Serverless framework will create a Cloudformation deployment.
 - **REGION** - AWS region of the setup, **Required**
 - **ECR_ID** - If you want to use other ECR than the default, **Optional**
 
+## Screenshots
+This is how it looks like in [action](../screenshots).
+
+## Price
+According to [dashbird](https://dashbird.io/lambda-cost-calculator/) calculator, the default deployment will cost you virtually nothing.
+
 ## Known problems waiting for improvement
 - `PutImageScanningConfiguration` and `StartImageScan` in scan/scan.go can run independently for each repository. The code could leverage goroutines and run concurrently.
 - Same thing with `DescribeImageScanFindings` in report/report.go. The code could leverage goroutines and run concurrently.
