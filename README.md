@@ -88,7 +88,7 @@ NOTE: the Serverless framework will create a Cloudformation deployment.
 - **ECR_ID** - If you want to use other ECR than the default, **Optional**
 
 ## Screenshots
-This is how it looks like in [action](../screenshots).
+This is how it looks like in [action](https://github.com/nagypeterjob/ecr-scan-lambda/tree/master/screenshots).
 
 ## Price
 According to [dashbird](https://dashbird.io/lambda-cost-calculator/) calculator, the default deployment will cost you virtually nothing.
