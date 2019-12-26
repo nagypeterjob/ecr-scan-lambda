@@ -16,7 +16,12 @@ Both functions are timed & run by Cloudwatch events. Can be configured in **serv
 
 ### Prerequisites
 1. The report function returns scan restults for the `latest` version of each image. Make sure to have `latest` version tag for your images beside the semantically tagged ones. 
-2. Get a Slack application (legacy) [token](https://api.slack.com/start/building)
+2. Get a Slack application [token](https://api.slack.com/start/building)
+  * Create a new Application (bot)
+  * Choose the channel the bot will post messages to
+  * Set oauth scope **channel:write** (maybe redeploy the application to the workspace)
+  * Grab the Bot Oauth Access Token
+  * Invite the bot to the selected slack channel (@BotName, then `Invite Bot`)
 3. Read through the environment variables for bot functions
 4. Use **serverless.yml** to deploy functions to your AWS environment (or integrate it to your CI/CD pipeline)
 
@@ -87,7 +92,6 @@ NOTE: the Serverless framework will create a Cloudformation deployment.
 - Same thing with `DescribeImageScanFindings` in report/report.go. The code could leverage goroutines and run concurrently.
 - Mocks and some tests could be definitely improved. More tests should be added.
 - The report funcion works well until 1000 repositories. The function currently doesn't implement paging. Paging for `DescribeRepositories` should be implemented.
-- The functions use the legacy Slack Token instead of the preferred Slack Webhooks. Need some research to see how Blocks can be used with Webhooks.
 
 ## Issues
 If stumble upon errors or just need a feature request, please open an issue. PRs are welcome.

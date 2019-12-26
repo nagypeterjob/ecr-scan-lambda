@@ -13,10 +13,9 @@ import (
 )
 
 type app struct {
-	env           string
-	region        string
-	ecrRegistryID string
-	ecrService    *internal.ECRService
+	env        string
+	region     string
+	ecrService *internal.ECRService
 }
 
 func errorResponse(err error) events.APIGatewayProxyResponse {
@@ -36,7 +35,7 @@ func (a *app) Handle(request events.APIGatewayProxyRequest) events.APIGatewayPro
 
 		_, err := a.ecrService.StartImageScan(repo.RepositoryName)
 		if err != nil {
-			fmt.Println(fmt.Sprintf("Image scan today was already done for repository: %s, error: %s", *repo.RepositoryName, err.Error()))
+			fmt.Println(fmt.Sprintf("Error when scanning repository: %s, error: %s", *repo.RepositoryName, err.Error()))
 		}
 	}
 	return events.APIGatewayProxyResponse{}
@@ -50,10 +49,9 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 		return errorResponse(err), nil
 	}
 	app := app{
-		env:           os.Getenv("ENV"),
-		region:        region,
-		ecrRegistryID: os.Getenv("ECR_ID"),
-		ecrService:    internal.NewECRService(region, ecr.New(sess)),
+		env:        os.Getenv("ENV"),
+		region:     region,
+		ecrService: internal.NewECRService(os.Getenv("ECR_ID"), ecr.New(sess)),
 	}
 	return app.Handle(request), nil
 }
