@@ -17,11 +17,11 @@ Both functions are timed & run by Cloudwatch events. Can be configured in **serv
 ### Prerequisites
 1. The report function returns scan restults for the `latest` version of each image. Make sure to have `latest` version tag for your images beside the semantically tagged ones. 
 2. Get a Slack application [token](https://api.slack.com/start/building)
-  2.1 Create a new Application (bot)
-  2.2 Choose the channel the bot will post messages to
-  2.3 Set oauth scope **channel:write** (maybe redeploy the application to the workspace)
-  2.4 Grab the Bot Oauth Access Token
-  2.5 Invite the bot to the selected slack channel (@BotName, then `Invite Bot`)
+  * Create a new Application (bot)
+  * Choose the channel the bot will post messages to
+  * Set oauth scope **channel:write** (maybe redeploy the application to the workspace)
+  * Grab the Bot Oauth Access Token
+  * Invite the bot to the selected slack channel (@BotName, then `Invite Bot`)
 3. Read through the environment variables for bot functions
 4. Use **serverless.yml** to deploy functions to your AWS environment (or integrate it to your CI/CD pipeline)
 
