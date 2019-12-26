@@ -9,19 +9,16 @@ var (
 	commitHash string
 	versionTag string
 	date       string
-	author     string
 )
 
 type version struct {
 	CommitHash string
 	Version    string
 	Date       string
-	Author     string
 }
 
 var versionTemplate = `
 Commit {{ .CommitHash}}
-Author: {{ .Author }}
 Date:   {{ .Date}}
 Version: {{ .Version}}
 `
@@ -32,7 +29,6 @@ func PrintVersion() error {
 		CommitHash: commitHash,
 		Version:    versionTag,
 		Date:       date,
-		Author:     author,
 	}
 
 	t, err := template.New("version").Parse(versionTemplate)

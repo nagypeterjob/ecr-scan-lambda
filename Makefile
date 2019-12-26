@@ -18,20 +18,18 @@ lint:
 .PHONY: build
 build:
 	GOOS=darwin go build -o="bin/report" -ldflags="\
-	-X 'github.com/nagypeterjob/ecr-scan-lambda/internal/version.commitHash=$(COMMIT_HASH)' \
-	-X 'github.com/nagypeterjob/ecr-scan-lambda/internal/version.version=$(TAG_VERSION)' \
-	-X 'github.com/nagypeterjob/ecr-scan-lambda/internal/version.date=$$(date)' \
-	-X 'github.com/nagypeterjob/ecr-scan-lambda/internal/version.author=Peter Nagy<peter.nagy@recart.com>'" report/report.go
+	-X 'github.com/nagypeterjob/ecr-scan-lambda/internal.commitHash=$(COMMIT_HASH)' \
+	-X 'github.com/nagypeterjob/ecr-scan-lambda/internal.version=$(TAG_VERSION)' \
+	-X 'github.com/nagypeterjob/ecr-scan-lambda/internal.date=$$(date)'" report/report.go
 
 	GOOS=darwin go build -o="bin/scan" scan/scan.go
 
 .PHONY: build-linux
 build-linux:
 	GOOS=linux go build -o="bin/report" -ldflags="\
-	-X 'github.com/nagypeterjob/ecr-scan-lambda/internal/version.xommitHash=$(COMMIT_HASH)' \
-	-X 'github.com/nagypeterjob/ecr-scan-lambda/internal/version.version=$(TAG_VERSION)' \
-	-X 'github.com/nagypeterjob/ecr-scan-lambda/internal/version.date=$$(date)' \
-	-X 'github.com/nagypeterjob/ecr-scan-lambda/internal/version.author=Peter Nagy<peter.nagy@recart.com>'" report/report.go
+	-X 'github.com/nagypeterjob/ecr-scan-lambda/internal.commitHash=$(COMMIT_HASH)' \
+	-X 'github.com/nagypeterjob/ecr-scan-lambda/internal.version=$(TAG_VERSION)' \
+	-X 'github.com/nagypeterjob/ecr-scan-lambda/internal.date=$$(date)'" report/report.go
 	
 	GOOS=linux go build -o="bin/scan" scan/scan.go
 vendor:
