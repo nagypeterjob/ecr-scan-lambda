@@ -49,7 +49,7 @@ The proper role and policies are created by the serverless framework.
 2. test:
 `make test`
 3. lint: 
-`make link`
+`make lint`
 
 ```bash
 NOTE: make build compiles both functions.
@@ -98,6 +98,7 @@ According to [dashbird](https://dashbird.io/lambda-cost-calculator/) calculator,
 - Same thing with `DescribeImageScanFindings` in report/report.go. The code could leverage goroutines and run concurrently.
 - Mocks and some tests could be definitely improved. More tests should be added.
 - The report funcion works well until 1000 repositories. The function currently doesn't implement paging. Paging for `DescribeRepositories` should be implemented.
+- I have plans to extend the code with posting reports to SNS topic, or sending via email
 
 ## Issues
 If stumble upon errors or just need a feature request, please open an issue. PRs are welcome.
