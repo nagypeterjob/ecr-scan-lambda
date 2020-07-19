@@ -38,7 +38,7 @@ build:
 
 .PHONY: build-linux
 build-linux:
-	GOOS=linux go build -o="bin/report" -ldflags="\
+	GOOS=linux go build -o="bin/report-linux" -ldflags="\
 	-X 'main.commitHash=$(COMMIT_HASH)' \
 	-X 'main.version=$(TAG_VERSION)' \
 	-X 'main.date=$$(date)'" \
