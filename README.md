@@ -145,7 +145,7 @@ AWS_REGION=us-east-1 serverless deploy --stage production --sns-topic <TOPIC_NAM
 
 
 ## Screenshots
-This is how it looks like in [action](https://github.com/nagypeterjob/ecr-scan-lambda/tree/master/screenshots).
+![alt text](https://github.com/nagypeterjob/ecr-scan-lambda/tree/master/screenshots/slack_exporter.png "Slack exporter")
 
 ## Price
 According to [dashbird](https://dashbird.io/lambda-cost-calculator/) calculator, the default deployment will cost virtually nothing.
