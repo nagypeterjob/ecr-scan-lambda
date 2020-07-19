@@ -6,9 +6,10 @@ provider:
   timeout: 20
   region: ${env:AWS_REGION}
   memorySize: 128
-  stage: ${opt:stage, 'dev'}
+  stage: ${opt:stage, 'production'}
   environment:
     ENV: ${self:provider.stage}
+  logRetentionInDays: 30
   iamRoleStatements:
     - Effect: "Allow"
       Action:
@@ -23,6 +24,10 @@ provider:
         - logs:CreateLogGroup
         - logs:CreateLogStream
       Resource: "*"
+    # - Effect: "Allow"
+    #   Action:
+    #     - sns:Publish
+    #   Resources: "arn:aws:sns:${env:AWS_REGION}:*:${opt:sns-topic}"
 package:
  exclude:
    - ./**
@@ -31,28 +36,33 @@ package:
 
 functions:
   ecr-report-lambda:
-    handler: bin/report
+    handler: bin/report-linux
     environment:
       ENV: ${self:provider.stage}
       REGION: us-east-1
       MINIMUM_SEVERITY: CRITICAL
-      SLACK_TOKEN: ""
-      SLACK_CHANNEL: "general"
-      #ECR_ID: 
-      #EMOJI_CRITICAL:
-      #EMOJI_HIGH:
-      #EMOJI_MEDIUM:
-      #EMOJI_LOW:
-      #EMOJI_INFORMATIONAL:
-      #EMOJI_UNDEFINED:
+      IMAGE_TAG: latest
+      EXPORTERS: log
+      LOG_LEVEL: INFO
+      NUM_WORKERS: 2
+      #ECR_ID:
+      #SLACK_TOKEN:
+      #SLACK_CHANNEL:
+      #SNS_TOPIC_ARN:
+      #MAILGUN_API_KEY:
+      #MAILGUN_FROM:
+      #MAILGUN_RECIPIENTS:
     events:
       - schedule: cron(0 8 * * ? *)
         enabled: true
 
   ecr-scan-lambda:
-    handler: bin/scan
+    handler: bin/scan-linux
     environment:
       ENV: ${self:provider.stage}
+      IMAGE_TAG: latest
+      LOG_LEVEL: INFO
+      NUM_WORKERS: 2
       REGION: us-east-1
       #ECR_ID: 
     events:

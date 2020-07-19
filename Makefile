@@ -1,3 +1,12 @@
+UNAME := $(shell uname)
+
+ifeq ($(UNAME), Linux)
+target := linux
+endif
+ifeq ($(UNAME), Darwin)
+target := darwin
+endif
+
 COMMIT_HASH=$$(git rev-list -1 HEAD)
 TAG_VERSION=$$(git tag --sort=committerdate | tail -1)
 
@@ -5,6 +14,8 @@ TAG_VERSION=$$(git tag --sort=committerdate | tail -1)
 test:
 	go test -count=1 -race -cover -v $(shell go list ./... | grep -v /vendor/)
 
+.PHONY: ci
+ci: lint test
 
 .PHONY: go-lint-install
 go-lint-install:
@@ -17,20 +28,26 @@ lint:
 
 .PHONY: build
 build:
-	GOOS=darwin go build -o="bin/report" -ldflags="\
-	-X 'github.com/nagypeterjob/ecr-scan-lambda/internal.commitHash=$(COMMIT_HASH)' \
-	-X 'github.com/nagypeterjob/ecr-scan-lambda/internal.version=$(TAG_VERSION)' \
-	-X 'github.com/nagypeterjob/ecr-scan-lambda/internal.date=$$(date)'" report/report.go
+	GOOS=$(target) go build -o="bin/report" -ldflags="\
+	-X 'main.commitHash=$(COMMIT_HASH)' \
+	-X 'main.version=$(TAG_VERSION)' \
+	-X 'main.date=$$(date)'" \
+	report/report.go report/config.go report/version.go
 
-	GOOS=darwin go build -o="bin/scan" scan/scan.go
+	GOOS=$(target) go build -o="bin/scan-linux" scan/scan.go scan/config.go
 
 .PHONY: build-linux
 build-linux:
 	GOOS=linux go build -o="bin/report" -ldflags="\
-	-X 'github.com/nagypeterjob/ecr-scan-lambda/internal.commitHash=$(COMMIT_HASH)' \
-	-X 'github.com/nagypeterjob/ecr-scan-lambda/internal.version=$(TAG_VERSION)' \
-	-X 'github.com/nagypeterjob/ecr-scan-lambda/internal.date=$$(date)'" report/report.go
-	
-	GOOS=linux go build -o="bin/scan" scan/scan.go
+	-X 'main.commitHash=$(COMMIT_HASH)' \
+	-X 'main.version=$(TAG_VERSION)' \
+	-X 'main.date=$$(date)'" \
+	report/report.go report/config.go report/version.go
+
+	GOOS=linux go build -o="bin/scan-linux" scan/scan.go scan/config.go
+
 vendor:
 	go mod vendor
+
+tidy:
+	go mod tidy

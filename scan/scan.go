@@ -1,57 +1,127 @@
 package main
 
 import (
+	"context"
 	"fmt"
-	"os"
+	"strconv"
+	"sync"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ecr"
-	"github.com/nagypeterjob/ecr-scan-lambda/internal"
+	api "github.com/nagypeterjob/ecr-scan-lambda/pkg/api"
+	"github.com/nagypeterjob/ecr-scan-lambda/pkg/logger"
 )
 
 type app struct {
+	api        *api.ECRService
 	env        string
+	imageTag   string
+	logger     *logger.Logger
+	numWorkers int
 	region     string
-	ecrService *internal.ECRService
 }
 
 func errorResponse(err error) events.APIGatewayProxyResponse {
 	return events.APIGatewayProxyResponse{Body: err.Error(), StatusCode: 500}
 }
 
-func (a *app) Handle(request events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
-	list, err := a.ecrService.ListRepositories(1000)
-	if err != nil {
-		return errorResponse(err)
-	}
-	for _, repo := range list.Repositories {
-		_, err = a.ecrService.PutImageScanningConfiguration(repo)
-		if err != nil {
-			fmt.Println(fmt.Sprintf("Could't set image scaning configuration for repository: %s, error: %s", *repo.RepositoryName, err.Error()))
-		}
+func (a *app) StartScan(in chan *api.ScanningResult, cancelFunc context.CancelFunc) chan error {
+	errc := make(chan error, 1)
+	var wg sync.WaitGroup
+	for i := 0; i < a.numWorkers; i++ {
+		wg.Add(1)
+		go func(i int) {
+			defer wg.Done()
+			for r := range in {
+				if r.Err != nil {
+					cancelFunc()
+					errc <- r.Err
+					return
+				}
 
-		_, err := a.ecrService.StartImageScan(repo.RepositoryName)
-		if err != nil {
-			fmt.Println(fmt.Sprintf("Error when scanning repository: %s, error: %s", *repo.RepositoryName, err.Error()))
-		}
+				_, err := a.api.StartImageScan(r.Output.RepositoryName)
+				a.logger.Infof("StartImageScan - (goroutine #%d) \n", i)
+				if err != nil {
+					if aerr, ok := err.(awserr.Error); ok {
+						switch aerr.Code() {
+						case ecr.ErrCodeLimitExceededException:
+							a.logger.Errorf("Todays scan limit exceeded for %s repository.\n", *r.Output.RepositoryName)
+						case ecr.ErrCodeImageNotFoundException:
+							a.logger.Errorf("Image with tag %s not found in repository %s.\n", a.imageTag, *r.Output.RepositoryName)
+						default:
+							a.logger.Errorf("Error when scanning repository: %s, error: %s \n", *r.Output.RepositoryName, err.Error())
+							cancelFunc()
+							return
+						}
+					}
+				}
+			}
+		}(i)
 	}
-	return events.APIGatewayProxyResponse{}
+	wg.Wait()
+	close(errc)
+	return errc
+}
+
+func (a *app) Handle(request events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
+	ctx, cancelFunc := context.WithCancel(context.Background())
+	defer cancelFunc()
+
+	// Load all ecr repositories into a channel
+	repositories, describeError := a.api.DescribeRepositoriesPages(ctx)
+
+	if err := <-describeError; err != nil {
+		cancelFunc()
+		fmt.Println(err)
+	}
+
+	// Enable image scanning ability on repositories
+	scanningResult := a.api.GenImageScanningConfiguration(ctx, repositories, a.numWorkers)
+
+	// Scan image with provided tag for each repositories
+	scanError := a.StartScan(scanningResult, cancelFunc)
+
+	if err := <-scanError; err != nil {
+		cancelFunc()
+		fmt.Println(err)
+	}
+
+	return events.APIGatewayProxyResponse{StatusCode: 200}
 }
 
 // Handler glues the lambda logic together
 func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	region := os.Getenv("REGION")
-	sess, err := session.NewSession(&aws.Config{Region: &region})
+	config, err := initConfig()
 	if err != nil {
-		return errorResponse(err), nil
+		return errorResponse(err), err
 	}
+
+	sess, err := session.NewSession(&aws.Config{Region: &config.region})
+	if err != nil {
+		return errorResponse(err), err
+	}
+
+	nw, err := strconv.ParseInt(config.numWorkers, 10, 64)
+	if err != nil {
+		return errorResponse(err), err
+	}
+
+	logger, err := logger.NewLogger(config.logLevel)
+	if err != nil {
+		return errorResponse(err), err
+	}
+
 	app := app{
-		env:        os.Getenv("ENV"),
-		region:     region,
-		ecrService: internal.NewECRService(os.Getenv("ECR_ID"), ecr.New(sess)),
+		api:        api.NewECRService(config.ecrID, config.region, config.imageTag, logger, ecr.New(sess)),
+		env:        config.env,
+		imageTag:   config.imageTag,
+		logger:     logger,
+		numWorkers: int(nw),
+		region:     config.region,
 	}
 	return app.Handle(request), nil
 }

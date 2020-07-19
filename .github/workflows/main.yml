@@ -20,4 +20,4 @@ jobs:
       env:
         GO111MODULE: "on"
       with:
-        args: make go-lint-install && make lint && make test && make build-linux
+        args: make go-lint-install && make ci && make build
