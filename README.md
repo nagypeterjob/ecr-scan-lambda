@@ -77,7 +77,15 @@ NOTE: the Serverless framework will create a Cloudformation deployment.
 #### Deploy without bulding the project
 - Install [Serverless framework](https://www.serverless.com/framework/docs/getting-started/) on your local machine
 - Navigate to the latest [release](https://github.com/nagypeterjob/ecr-scan-lambda/releases) and download `deployment.zip`
-- Unzip `deployment.zip` and run:
+- Unzip `deployment.zip` and place the two binaries in a directory called `bin`
+```
+root/
+├── bin/
+│   ├── report-linux
+│   └── scan-linux
+└── serverless.yml
+```
+Then run:
 ```bash
 $ AWS_REGION=us-east-1 serverless deploy --stage production
 ```
